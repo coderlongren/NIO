@@ -4,13 +4,20 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 
 import org.ietf.jgss.Oid;
@@ -22,6 +29,48 @@ import org.junit.Test;
 * 类说明: 
 */
 public class TestChannel {
+	
+	
+	// 测试字符集
+	@Test
+	public void test5() {
+		Map<String, Charset> charMap = Charset.availableCharsets();
+		for (Entry<String, Charset> entry : charMap.entrySet()) {
+			System.out.println(entry.getKey() + ":" + entry.getValue());
+		}
+	}
+	
+	
+	
+	// 分散读取，
+	@Test
+	public void test4() throws IOException {
+		RandomAccessFile raFile = new RandomAccessFile("E:/Ehcache/1.txt","rw");
+		// 获取通道
+		FileChannel channel1 = raFile.getChannel();
+		// 分配缓冲区
+		ByteBuffer buf1 = ByteBuffer.allocate(1);
+		ByteBuffer buf2 = ByteBuffer.allocate(1024);
+		
+		// 分散读取, 缓冲区数组
+		ByteBuffer[] buffers = {buf1,buf2};
+		channel1.read(buffers);
+		for (ByteBuffer buffer : buffers) {
+			buffer.flip();/// 为每个缓冲区转换读写模式
+		}
+		System.out.println(new String(buffers[0].array(),0,buffers[0].limit()));
+		System.out.println(new String(buffers[1].array(), 0, buffers[1].limit()));
+		System.out.println("complete");
+		
+		// 聚集写入
+		RandomAccessFile raf2 = new RandomAccessFile("E:/Ehcache/2.txt", "rw");
+		FileChannel channel2 = raf2.getChannel();
+		
+		channel2.write(buffers);
+	}
+	
+	
+	
 	
 	// 通道之间的数据通信
 	@Test
@@ -127,5 +176,40 @@ public class TestChannel {
 			e.printStackTrace();
 		}
 	}
+	//字符集
+		@Test
+		public void test6() throws IOException{
+			Charset cs1 = Charset.forName("GBK");
+			
+			//获取编码器
+			CharsetEncoder ce = cs1.newEncoder();
+			
+			//获取解码器
+			CharsetDecoder cd = cs1.newDecoder();
+			
+			CharBuffer cBuf = CharBuffer.allocate(1024);
+			cBuf.put("CharSetEncoder test......");
+			cBuf.flip();
+			
+			//编码
+			ByteBuffer bBuf = ce.encode(cBuf);
+			
+			for (int i = 0; i < 12; i++) {
+				System.out.println(bBuf.get());
+			}
+			
+			//解码
+			bBuf.flip();
+			CharBuffer cBuf2 = cd.decode(bBuf);
+			System.out.println(cBuf2.toString());
+			
+			System.out.println("------------------------------------------------------");
+			
+			Charset cs2 = Charset.forName("GBK");
+			bBuf.flip();
+			CharBuffer cBuf3 = cs2.decode(bBuf);
+			System.out.println(cBuf3.toString());
+		}
+		
 
 }
