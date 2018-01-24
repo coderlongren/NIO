@@ -84,5 +84,28 @@ mark: 标记，表示记录当前 position 的位置。可以通过 reset() 恢�
  * 
  */
  ## NIO在网络通信的核心技术
+ Java NIO 管道是2个线程之间的单向数据连接。 Pipe有一个source通道和一个sink通道。数据会 被写到sink通道，从source通道读取。
  
+ 当调用 register(Selector sel, int ops)  将通道注册选择器时，选择器 对通道的监听事件，需要通过第二个参数 ops 指定。可以监听的事件类型（可使用 SelectionKey 的四个常量表示）：
+* 读 : SelectionKey.OP_READ  （1）
+* 写 : SelectionKey.OP_WRITE    （4）
+* 连接 : SelectionKey.OP_CONNECT （8）
+* 接收 : SelectionKey.OP_ACCEPT  （16） 
+ 
+ ---
+  java.nio.file.Path 接口代表一个平台无关的平台路径，描述了目 录结构中文件的位置。
+ Paths 提供的 get() 方法用来获取 Path 对象：    
+Path get(String first, String … more) : 用于将多个字符串串连成路径。  
+Path常用方法：  
+boolean endsWith(String path) : 判断是否以 path 路径结束  
+boolean startsWith(String path) : 判断是否以 path 路径开始  
+boolean isAbsolute() : 判断是否是绝对路径  
+Path getFileName() : 返回与调用 Path 对象关联的文件名  
+Path getName(int idx) : 返回的指定索引位置 idx 的路径名称  
+int getNameCount() : 返回Path 根目录后面元素的数量  
+Path getParent() ：返回Path对象包含整个路径，不包含Path 对象指定的文件路径 
+Path getRoot() ：返回调用 Path 对象的根路径 
+Path resolve(Path p) :将相对路径解析为绝对路径 
+Path toAbsolutePath() : 作为绝对路径返回调用 Path 对象 
+String toString() ： 返回调用 Path 对象的字符串表示形式
  
